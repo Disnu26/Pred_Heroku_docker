@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Risk Check</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            color: #2196F3;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .result {
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .result-positive {
+            background-color: #FFCDD2;
+            color: #D32F2F;
+        }
+
+        .result-negative {
+            background-color: #C8E6C9;
+            color: #388E3C;
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Diabetes Risk Assessment</h1>
+        </div>
+        <form id="prediction-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Pregnancies</label>
+                    <input type="number" id="pregnancies" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Glucose</label>
+                    <input type="number" id="glucose" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Blood Pressure</label>
+                    <input type="number" id="blood_pressure" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Skin Thickness</label>
+                    <input type="number" id="skin_thickness" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Insulin</label>
+                    <input type="number" id="insulin" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>BMI</label>
+                    <input type="number" id="bmi" class="form-control" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label>Diabetes Pedigree</label>
+                    <input type="number" id="diabetes_pedigree" class="form-control" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" id="age" class="form-control" required>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Check Risk</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('prediction-form');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            resultDiv.textContent = '';
+            resultDiv.classList.remove('result-positive', 'result-negative');
+
+            const inputData = {
+                pregnancies: parseFloat(document.getElementById('pregnancies').value),
+                glucose: parseFloat(document.getElementById('glucose').value),
+                blood_pressure: parseFloat(document.getElementById('blood_pressure').value),
+                skin_thickness: parseFloat(document.getElementById('skin_thickness').value),
+                insulin: parseFloat(document.getElementById('insulin').value),
+                bmi: parseFloat(document.getElementById('bmi').value),
+                diabetes_pedigree: parseFloat(document.getElementById('diabetes_pedigree').value),
+                age: parseFloat(document.getElementById('age').value)
+            };
+
+            try {
+                const response = await fetch('/predict', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(inputData)
+});
+
+
+                const result = await response.json();
+                resultDiv.textContent = result.prediction;
+                resultDiv.classList.add(result.prediction === 'High Risk' ? 'result-positive' : 'result-negative');
+            } catch (error) {
+                resultDiv.textContent = 'Error: Unable to fetch prediction.';
+                resultDiv.classList.add('result-negative');
+            }
+        });
+    </script>
+</body>
+</html>
